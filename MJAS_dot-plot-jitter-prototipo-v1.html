@@ -1,0 +1,1207 @@
+
+<h2 class="sr-only">Dot plot Likert — identità ebraico-italiana, 6 dimensioni scala 0-4, filtri demografici e highlight nucleo famigliare</h2>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --tr-green-dark: #6b9e90;   /* G1 — verde medio */
+  --tr-green: #7caba1;
+  --tr-green-light: #b9d6cf;
+  --tr-green-soft: #b5d2cb;
+  --tr-cream: #edeadd;
+  --tr-cream-dark: #e0dccc;
+  --tr-coral: #f17e5a;
+  --tr-coral-soft: rgba(241, 126, 90, 0.10);
+  --tr-text: #2d3a36;
+  --tr-text-soft: #5b6864;
+  --tr-text-mute: #8b9591;
+  --tr-border: rgba(0, 0, 0, 0.08);
+  --tr-bg: #fffcf8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+.wrap { padding: 1.5rem 1.25rem 2rem; font-family: 'DM Sans', system-ui, -apple-system, sans-serif; color: var(--tr-text); background: var(--tr-cream); }
+.hdr { margin-bottom: 1.5rem; }
+.hdr h1 { font-size: 18px; font-weight: 600; color: var(--tr-text); }
+.hdr p  { font-size: 12px; color: var(--tr-text-soft); margin-top: 3px; }
+
+.filters-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+.filters-title h2 {
+  font-size: 17px; font-weight: 600; color: var(--tr-text);
+}
+.filters-desc {
+  font-size: 12px; color: var(--tr-text-soft);
+  margin-top: 3px;
+}
+.rbtn-clear {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: inherit; font-size: 12px; font-weight: 400;
+  color: var(--tr-coral);
+  background: transparent;
+  border: 0;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: opacity .12s;
+}
+.rbtn-clear:hover { opacity: 0.7; }
+.rbtn-clear svg { width: 11px; height: 11px; }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+@media(max-width:900px){ .main-grid { grid-template-columns: 1fr; gap: 20px; } }
+
+.sidebar .filters-bar { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 22px;
+  margin-bottom: 1.5rem;
+}
+.demo-sidebar {
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-bottom: 0;
+}
+@media(max-width:900px){ .filters:not(.demo-sidebar){grid-template-columns:repeat(2,1fr);} }
+@media(max-width:580px){ .filters{grid-template-columns:1fr;} }
+
+.fc {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.fl {
+  font-size: 13px; font-weight: 600; color: var(--tr-text);
+  margin-bottom: 10px; text-transform: none; letter-spacing: 0;
+}
+.fl-range-val { color: var(--tr-coral); font-weight: 600; }
+
+.btn-group { display: flex; flex-wrap: wrap; gap: 12px; }
+.tg {
+  font-family: inherit;
+  font-size: 12px; line-height: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 0;
+  background: var(--tr-bg);
+  color: var(--tr-text);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+  white-space: nowrap;
+}
+.tg:hover { background: var(--tr-coral-soft); }
+.tg.on {
+  background: var(--tr-coral);
+  color: #fff;
+}
+.tg-count { color: var(--tr-text-mute); font-weight: 400; margin-left: 3px; }
+.tg.on .tg-count { color: rgba(255,255,255,0.85); }
+
+/* divider tra blocchi di filtri */
+.interp-divider {
+  border-top: 0.5px solid var(--tr-border);
+  margin: 0.5rem 0 1.5rem;
+}
+
+/* griglia per i filtri interpretativi (4 colonne, una riga) */
+.filters-interp { grid-template-columns: repeat(4, 1fr); }
+@media(max-width:900px){ .filters-interp{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:580px){ .filters-interp{grid-template-columns:1fr;} }
+.filters-interp .fl { font-size: 11.5px; min-height: 30px; }
+
+/* dropdown a selezione multipla */
+.dropdown { position: relative; }
+.dropdown-trigger {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--tr-bg);
+  border: 0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--tr-text-soft);
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s;
+}
+.dropdown-trigger:hover { background: var(--tr-coral-soft); }
+.dropdown.open .dropdown-trigger { background: var(--tr-coral-soft); color: var(--tr-text); }
+.dropdown-placeholder.has-selection { color: var(--tr-coral); font-weight: 600; }
+.dropdown-caret { width: 10px; height: 10px; margin-left: 8px; color: var(--tr-text-mute); transition: transform .15s; flex-shrink: 0; }
+.dropdown.open .dropdown-caret { transform: rotate(180deg); }
+.dropdown-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px); left: 0;
+  min-width: 100%;
+  max-width: 360px;
+  width: max-content;
+  background: var(--tr-bg);
+  border: 0.5px solid var(--tr-border);
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  z-index: 15;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.dropdown.open .dropdown-panel { display: block; }
+.dropdown-item {
+  display: flex; align-items: flex-start;
+  gap: 8px;
+  padding: 7px 9px;
+  font-size: 11.5px;
+  color: var(--tr-text);
+  cursor: pointer;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+.dropdown-item:hover { background: var(--tr-coral-soft); }
+.dropdown-item input[type=checkbox] { margin-top: 2px; accent-color: var(--tr-coral); flex-shrink: 0; }
+.dropdown-item-label { flex: 1; }
+.dropdown-item-count { color: var(--tr-text-mute); font-weight: 400; margin-left: 4px; }
+
+/* dual-range slider */
+.range-wrap {
+  position: relative;
+  height: 28px;
+  margin-top: 6px;
+  padding: 0 8px;
+}
+.range-track {
+  position: absolute;
+  top: 12px; left: 8px; right: 8px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.07);
+  border-radius: 4px;
+}
+.range-fill {
+  position: absolute;
+  top: 0; bottom: 0;
+  background: var(--tr-coral);
+  border-radius: 4px;
+}
+.range-wrap input[type=range] {
+  position: absolute;
+  top: 4px; left: 0; right: 0;
+  width: 100%;
+  height: 20px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+.range-wrap input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto;
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--tr-coral);
+  border: 2px solid var(--tr-cream);
+  cursor: grab;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+.range-wrap input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--tr-coral);
+  border: 2px solid var(--tr-cream);
+  cursor: grab;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+.range-bounds { display: flex; justify-content: space-between; font-size: 11px; color: var(--tr-text-mute); margin-top: 4px; padding: 0 2px; }
+
+.cw {
+  background: var(--tr-bg);
+  border: 1px solid var(--tr-border);
+  border-radius: 10px;
+  padding: 1.5rem 1.5rem 1.25rem;
+}
+
+.bottom-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+  margin-top: 14px; padding-top: 12px;
+  border-top: 0.5px solid var(--tr-border);
+}
+.top-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 24px;
+  margin-bottom: 14px; padding-bottom: 12px;
+  border-bottom: 0.5px solid var(--tr-border);
+}
+.top-bar .foot { text-align: left; flex: 1; }
+.leg { display: flex; flex-wrap: wrap; gap: 16px; }
+.li { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--tr-text-soft); }
+.dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+
+/* Close button per il tooltip pinnato */
+.close-x {
+  position: absolute;
+  top: 6px; right: 8px;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; line-height: 1;
+  color: var(--tr-text-mute);
+  cursor: pointer;
+  border-radius: 50%;
+  pointer-events: auto;
+  user-select: none;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+.close-x:hover { color: var(--tr-text); background: rgba(0,0,0,0.06); }
+
+.foot { font-size: 11px; color: var(--tr-text-mute); text-align: right; }
+</style>
+
+<div class="wrap">
+  <div class="hdr">
+    <h1>MJAS — Mediterranean Jewish Acculturation</h1>
+    <p>23 intervistati su 26 (3 interviste in corso)</p>
+  </div>
+
+  <div class="main-grid">
+    <aside class="sidebar">
+      <div class="filters-bar">
+        <div class="filters-title">
+          <h2>Filtri demografici</h2>        </div>
+        <button class="rbtn-clear" onclick="resetF()">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>
+          Cancella filtri
+        </button>
+      </div>
+
+      <div class="filters demo-sidebar">
+        <div class="fc">
+          <div class="fl">Generazione</div>
+          <div class="btn-group" id="bg_gen"></div>
+        </div>
+        <div class="fc">
+          <div class="fl">Origini</div>
+          <div class="btn-group" id="bg_ori"></div>
+        </div>
+        <div class="fc">
+          <div class="fl">Anno di nascita: <span class="fl-range-val" id="anno_range_label">1925 – 1990</span></div>
+          <div class="range-wrap" id="range_wrap">
+            <div class="range-track"><div class="range-fill" id="range_fill"></div></div>
+            <input type="range" id="anno_min" min="1925" max="1990" value="1925" step="1">
+            <input type="range" id="anno_max" min="1925" max="1990" value="1990" step="1">
+          </div>
+          <div class="range-bounds">
+            <span>1925</span><span>1990</span>
+          </div>
+        </div>
+        <div class="fc">
+          <div class="fl">Genere</div>
+          <div class="btn-group" id="bg_sex"></div>
+        </div>
+        <div class="fc">
+          <div class="fl">Paese di nascita</div>
+          <div class="btn-group" id="bg_pn"></div>
+        </div>
+        <div class="fc">
+          <div class="fl">Matrimonio misto</div>
+          <div class="btn-group" id="bg_mm"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+  <div class="filters-bar">
+    <div class="filters-title">
+      <h2>Filtri interpretativi</h2>
+    </div>
+  </div>
+
+  <div class="filters filters-interp">
+    <div class="fc">
+      <div class="fl">Profili identitari relativi ad Acculturazione, calcolati dalla combinazione degli indicatori</div>
+      <div class="dropdown" id="dd_profA">
+        <button type="button" class="dropdown-trigger">
+          <span class="dropdown-placeholder">Tutti</span>
+          <svg class="dropdown-caret" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="2 2 6 6 10 2"/></svg>
+        </button>
+        <div class="dropdown-panel"></div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fl">Profili identitari relativi a Religiosità (Identità ebraica)</div>
+      <div class="dropdown" id="dd_profJ1">
+        <button type="button" class="dropdown-trigger">
+          <span class="dropdown-placeholder">Tutti</span>
+          <svg class="dropdown-caret" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="2 2 6 6 10 2"/></svg>
+        </button>
+        <div class="dropdown-panel"></div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fl">Profili identitari relativi a Identità culturale ebraica (Identità ebraica)</div>
+      <div class="dropdown" id="dd_profJ2">
+        <button type="button" class="dropdown-trigger">
+          <span class="dropdown-placeholder">Tutti</span>
+          <svg class="dropdown-caret" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="2 2 6 6 10 2"/></svg>
+        </button>
+        <div class="dropdown-panel"></div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fl">Profili identitari relativi a Memoria mediterranea</div>
+      <div class="dropdown" id="dd_profM">
+        <button type="button" class="dropdown-trigger">
+          <span class="dropdown-placeholder">Tutti</span>
+          <svg class="dropdown-caret" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="2 2 6 6 10 2"/></svg>
+        </button>
+        <div class="dropdown-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cw">
+    <div class="top-bar">
+      <div class="foot">---testo da rivedere--- Ciascun punto corrisponde alla media degli item della sotto-scala Likert di ogni intervistato/a. Passa il mouse su un punto per evidenziare il profilo identitario dell'intervistato/a e il nucleo famigliare. Clicca per fissare le info.</div>
+      <div class="leg">
+        <div class="li"><span class="dot" style="background:#6b9e90"></span>Prima generazione</div>
+        <div class="li"><span class="dot" style="background:#b9d6cf"></span>Seconda generazione</div>
+      </div>
+    </div>
+    <div style="position:relative;height:540px;" id="cwrap">
+      <canvas id="dc" role="img" aria-label="Dot plot scatter di 6 dimensioni sull'identità ebraico-italiana, scala Likert 0-4">Distribuzione risposte su 6 dimensioni scala 0-4 sull'identità ebraico-italiana.</canvas>
+    </div>
+  </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ============================================================
+// DATI (estratti da "TRAME - dataset con Nicol.xlsx")
+// Esclusi P5, P6, P22 — interviste in corso (righe gialle)
+// Anno_nascita: valori reali dove disponibili, altrimenti FITTIZI (anno_fake:true)
+// ============================================================
+const POOL_DATA = [
+  {"id":"P1","famiglia":"F1","gen":"G1","origini":"Turchia","anno":1926,"anno_fake":false,"genere":"F","paese_nascita":"Turchia","matrimonio_misto":"No","scores":[1.0,2.0,2.0,0.0,1.5,2.0]},
+  {"id":"P2","famiglia":"F1","gen":"G2","origini":"Turchia","anno":1965,"anno_fake":true,"genere":"M","paese_nascita":"Italia","matrimonio_misto":"Sì","scores":[3.0,1.0,2.0,1.0,2.0,2.0]},
+  {"id":"P3","famiglia":"F1","gen":"G2","origini":"Turchia","anno":1959,"anno_fake":true,"genere":"M","paese_nascita":"Italia","matrimonio_misto":"Non noto","scores":[3.5,1.0,1.0,1.0,2.0,2.0]},
+  {"id":"P4","famiglia":"F1","gen":"G2","origini":"Turchia","anno":1975,"anno_fake":true,"genere":"F","paese_nascita":"Italia","matrimonio_misto":"Non sposato/a","scores":[4.0,0.0,0.0,1.0,1.5,3.0]},
+  {"id":"P28","famiglia":"F2","gen":"G1","origini":"Turchia","anno":1933,"anno_fake":true,"genere":"M","paese_nascita":"Turchia","matrimonio_misto":"No","scores":[3.5,2.5,3.5,2.0,3.0,3.0]},
+  {"id":"P9","famiglia":"F3","gen":"G1","origini":"Libia","anno":1931,"anno_fake":true,"genere":"F","paese_nascita":"Libia","matrimonio_misto":"No","scores":[2.0,2.0,2.0,3.0,3.0,3.0]},
+  {"id":"P10","famiglia":"F3","gen":"G2","origini":"Libia","anno":1963,"anno_fake":true,"genere":"F","paese_nascita":"Italia","matrimonio_misto":"No","scores":[4.0,null,null,3.0,3.0,2.0]},
+  {"id":"P11","famiglia":"F4","gen":"G1","origini":"Libia","anno":1952,"anno_fake":true,"genere":"F","paese_nascita":"Libia","matrimonio_misto":"No","scores":[4.0,3.0,4.0,4.0,4.0,4.0]},
+  {"id":"P13","famiglia":"F4","gen":"G2","origini":"Libia","anno":1960,"anno_fake":true,"genere":"F","paese_nascita":"Italia","matrimonio_misto":"Non sposato/a","scores":[4.0,1.5,2.0,1.0,1.0,2.0]},
+  {"id":"P14","famiglia":"F5","gen":"G1","origini":"Libia","anno":1964,"anno_fake":false,"genere":"F","paese_nascita":"Libia","matrimonio_misto":"No","scores":[3.0,1.0,1.0,4.0,4.0,4.0]},
+  {"id":"P15","famiglia":"F5","gen":"G2","origini":"Libia","anno":1959,"anno_fake":true,"genere":"F","paese_nascita":"Italia","matrimonio_misto":"Non sposato/a","scores":[3.0,2.5,4.0,4.0,4.0,4.0]},
+  {"id":"P16","famiglia":"F5","gen":"G2","origini":"Libia","anno":1963,"anno_fake":true,"genere":"F","paese_nascita":"Italia","matrimonio_misto":"Non sposato/a","scores":[2.0,2.0,3.0,4.0,4.0,4.0]},
+  {"id":"P17","famiglia":"F6","gen":"G1","origini":"Libano","anno":1938,"anno_fake":true,"genere":"F","paese_nascita":"Libano","matrimonio_misto":"No","scores":[2.5,4.0,4.0,4.0,4.0,4.0]},
+  {"id":"P18","famiglia":"F6","gen":"G2","origini":"Libano","anno":1972,"anno_fake":true,"genere":"F","paese_nascita":"Italia","matrimonio_misto":"Non sposato/a","scores":[3.0,2.5,3.0,4.0,4.0,3.0]},
+  {"id":"P19","famiglia":"F7","gen":"G1","origini":"Libano","anno":1957,"anno_fake":true,"genere":"F","paese_nascita":"Libano","matrimonio_misto":"No","scores":[2.0,2.0,1.5,3.0,3.0,2.0]},
+  {"id":"P20","famiglia":"F7","gen":"G2","origini":"Libano","anno":1959,"anno_fake":true,"genere":"M","paese_nascita":"Libano","matrimonio_misto":"No","scores":[3.0,3.0,3.0,3.0,4.0,3.5]},
+  {"id":"P21","famiglia":"F8","gen":"G1","origini":"Egitto","anno":1937,"anno_fake":true,"genere":"F","paese_nascita":"Egitto","matrimonio_misto":"Sì","scores":[4.0,1.5,1.0,2.0,2.0,2.0]},
+  {"id":"P24","famiglia":"F9","gen":"G1","origini":"Egitto","anno":1939,"anno_fake":true,"genere":"F","paese_nascita":"Egitto","matrimonio_misto":"Sì","scores":[3.0,0.5,0.5,1.0,0.0,1.0]},
+  {"id":"P25","famiglia":"F9","gen":"G2","origini":"Egitto","anno":1986,"anno_fake":true,"genere":"M","paese_nascita":"Italia","matrimonio_misto":"Sì","scores":[4.0,2.0,1.0,2.0,1.0,2.0]},
+  {"id":"P26","famiglia":"F10","gen":"G1","origini":"Egitto","anno":1945,"anno_fake":false,"genere":"F","paese_nascita":"Egitto","matrimonio_misto":"Sì","scores":[4.0,2.0,2.0,1.0,2.0,3.0]},
+  {"id":"P27","famiglia":"F11","gen":"G1","origini":"Iran","anno":1942,"anno_fake":true,"genere":"F","paese_nascita":"Iran","matrimonio_misto":"Non noto","scores":[2.5,0.0,2.0,4.0,4.0,1.0]},
+  {"id":"P29","famiglia":"F11","gen":"G2","origini":"Iran","anno":1958,"anno_fake":true,"genere":"F","paese_nascita":"Italia","matrimonio_misto":"Non noto","scores":[4.0,2.0,3.5,4.0,4.0,4.0]},
+  {"id":"P30","famiglia":"F13","gen":"G1","origini":"Iran","anno":1935,"anno_fake":true,"genere":"F","paese_nascita":"Iran","matrimonio_misto":"Sì","scores":[4.0,2.0,2.0,2.0,2.5,2.0]},
+];
+POOL_DATA.forEach((p,i)=>p._idx=i);
+
+// ============================================================
+// COSTANTI VIZ
+// ============================================================
+const QY = [
+  ['Orientamento verso',     'la cultura italiana'],
+  ['Mantenimento della',     "cultura d'origine"],
+  ['Integrazione',           'biculturale'],
+  ['Religiosità',            '(pratica rituale)'],
+  ['Identità culturale',     'ebraica'],
+  ['Memoria',                'mediterranea']
+];
+// Posizione Y di ciascun indicatore: passo 0.7 dentro lo stesso gruppo, 1.3 tra gruppi
+const QI_TO_Y = [1, 1.7, 2.4, 3.7, 4.4, 5.7];
+// Etichette di categoria nei "gap" tra i gruppi
+const CATEGORIES = [
+  { label: 'ACCULTURAZIONE',         y: 0.65 },
+  { label: 'IDENTITÀ EBRAICA',       y: 3.35 },
+  { label: 'MEMORIA MEDITERRANEA',   y: 5.35 }
+];
+// Domande corrispondenti a ciascun indicatore (asse Y, scritte sotto al nome formale)
+const QUESTIONS = [
+  'Quanto sono dentro la cultura italiana?',
+  "Quanto resto legato all'origine?",
+  'Come convivono queste due parti?',
+  "Quanto pratico l'ebraismo come religione?",
+  'Quanto è centrale nella mia identità?',
+  'Il passato vive? E come?'
+];
+const CODES = ['A1','A2','A3','J1','J2','M'];
+const SCALE = ['Per niente','Poco','Abbastanza','Molto','Completamente'];
+
+const GEN_LABEL = {
+  'G1': 'Prima generazione',
+  'G2': 'Seconda generazione'
+};
+const MM_LABEL = {
+  'Sì': 'Matrimonio misto',
+  'No': 'Matrimonio non misto',
+  'Non noto': 'Matrimonio non noto',
+  'Non sposato/a': 'Non sposata/o'
+};
+
+const PALETTE = {
+  G1: '#6b9e90',  // verde medio (prima generazione)
+  G2: '#b9d6cf',  // verde chiaro pastello (seconda generazione)
+  accent: '#f17e5a',
+  dim: 'rgba(0, 0, 0, 0)',
+  dimBorder: 'transparent'
+};
+
+// ============================================================
+// LOGICA PROFILO (per tooltip)
+// ============================================================
+// Livelli a 3 fasce: Valore basso (0-1.5), medio (1.6-2.5), alto (2.6+)
+// Riferimento: tabelle "Range" / "Significato DH" del documento Trame cdec.
+function lvl(s){
+  if (s==null) return null;
+  if (s<=1.5) return 'basso';
+  if (s<=2.5) return 'medio';
+  return 'alto';
+}
+// Livelli M a 4 fasce: basso (0-1.5), medio (1.6-2.5), alto (2.6-3.2), molto alto (3.3-4)
+function lvlM(s){
+  if (s==null) return null;
+  if (s<=1.5) return 'basso';
+  if (s<=2.5) return 'medio';
+  if (s<=3.2) return 'alto';
+  return 'molto_alto';
+}
+
+// Profili J1, J2, M: livelli singolo-indicatore dalle tabelle del documento (colonna Significato DH)
+const PROFILE_J1_DEFS = [
+  { key:'basso', lab:'Assenza o quasi totale di pratica religiosa' },
+  { key:'medio', lab:'Pratica selettiva, occasionale o non sistematica' },
+  { key:'alto',  lab:'Forte coinvolgimento rituale e partecipazione religiosa' }
+];
+const PROFILE_J2_DEFS = [
+  { key:'basso', lab:'Identità ebraica debole o marginale e scarsa presenza di riferimenti simbolici o culturali' },
+  { key:'medio', lab:'Identità ebraica presente sul piano affettivo o biografico, con continuità culturale parziale o discontinua' },
+  { key:'alto',  lab:'Identità ebraica forte e centrale, con presenza viva di elementi culturali e simbolici' }
+];
+const PROFILE_M_DEFS = [
+  { key:'basso',      lab:'Memoria debole o frattura' },
+  { key:'medio',      lab:'Memoria flessibile, continuità affettiva' },
+  { key:'alto',       lab:'Memoria attiva, presenza simbolica' },
+  { key:'molto_alto', lab:'Memoria generativa, trasmissione forte' }
+];
+
+// Profilo A: 5 archetipi dal documento (combinazione A1/A2/A3); "non classificato" altrove
+const PROFILE_A_DEFS = [
+  { key:'armonica',     lab:'Integrazione armonica',           desc:'Entrambe le appartenenze sono forti e convivono bene' },
+  { key:'conflittuale', lab:'Doppia appartenenza conflittuale',desc:'I due poli sono presenti ma in tensione' },
+  { key:'prevalenza_it',lab:'Prevalenza del polo italiano',    desc:"Con ridotto investimento nell'origine" },
+  { key:'chiusura',     lab:"Chiusura sul polo d'origine",     desc:'Scarsa integrazione interna' },
+  { key:'debole',       lab:'Debole investimento identitario', desc:'In entrambi i poli, ma discreta capacità di farli coesistere' }
+];
+function getProfileA(a1,a2,a3){
+  const [l1,l2,l3]=[a1,a2,a3].map(lvl);
+  if(l1===null||l2===null||l3===null) return {key:'incompleto', lab:'Profilo incompleto', desc:'Alcuni punteggi A1/A2/A3 non disponibili'};
+  if(l1==='alto'&&l2==='alto'&&l3==='alto')   return {key:'armonica',     ...PROFILE_A_DEFS[0]};
+  if(l1==='alto'&&l2==='alto'&&l3==='basso')  return {key:'conflittuale', ...PROFILE_A_DEFS[1]};
+  if(l1==='alto'&&l2==='basso'&&l3==='medio') return {key:'prevalenza_it',...PROFILE_A_DEFS[2]};
+  if(l1==='basso'&&l2==='alto'&&l3==='basso') return {key:'chiusura',     ...PROFILE_A_DEFS[3]};
+  if(l1==='basso'&&l2==='basso'&&l3==='medio')return {key:'debole',       ...PROFILE_A_DEFS[4]};
+  return {key:'non_classificato', lab:'Profilo non classificato', desc:''};
+}
+
+// Interpretazioni per indicatore (colonna "Significato DH" delle tabelle del documento Trame cdec)
+const INTERP_J1 = {
+  basso: 'Assenza o quasi totale di pratica religiosa',
+  medio: 'Pratica selettiva, occasionale o non sistematica',
+  alto:  'Forte coinvolgimento rituale e partecipazione religiosa'
+};
+const INTERP_J2 = {
+  basso: 'Identità ebraica debole o marginale e scarsa presenza di riferimenti simbolici o culturali',
+  medio: 'Identità ebraica presente sul piano affettivo o biografico, con continuità culturale parziale o discontinua',
+  alto:  'Identità ebraica forte e centrale, con presenza viva di elementi culturali e simbolici'
+};
+const INTERP_M = {
+  basso:      'Memoria debole o frattura',
+  medio:      'Memoria flessibile, continuità affettiva',
+  alto:       'Memoria attiva, presenza simbolica',
+  molto_alto: 'Memoria generativa, trasmissione forte'
+};
+// Dettagli aggiuntivi per il tooltip M (sottotitolo + chiave interpretativa, dal documento)
+const M_DETAIL = {
+  basso: {
+    sub: 'Pochi legami con il passato familiare e culturale',
+    keys: [
+      'scarsa presenza di ricordi, simboli, racconti',
+      'debole continuità intergenerazionale',
+      'possibile rottura o distanza dalla storia familiare'
+    ]
+  },
+  medio: {
+    sub: 'Il passato è presente, ma non guida la vita',
+    keys: [
+      'memoria disponibile ma non dominante',
+      'selettiva, non idealizzata',
+      "può essere evocata ma non struttura l'identità"
+    ]
+  },
+  alto: {
+    sub: 'Il passato è parte della vita quotidiana',
+    keys: [
+      'ricordi frequenti, racconti, pratiche',
+      'trasmissione concreta (cibo, gesti, linguaggi)',
+      'la memoria orienta scelte e identità'
+    ]
+  },
+  molto_alto: {
+    sub: 'Il passato viene rielaborato e condiviso con le nuove generazioni',
+    keys: [
+      'trasmissione intenzionale e simbolizzata',
+      'narrazione esplicita della storia familiare',
+      'trasformazione del passato in risorsa, memoria non solo vissuta, ma pensata e consegnata'
+    ]
+  }
+};
+
+// ============================================================
+// JITTER (deterministico)
+// ============================================================
+let _seed = 53;
+function rn(){_seed=(_seed*1664525+1013904223)&0xffffffff;return(_seed>>>0)/4294967296;}
+const JX = POOL_DATA.map(()=>[...Array(6)].map(()=>(rn()-0.5)*0.26));
+const JY = POOL_DATA.map(()=>[...Array(6)].map(()=>(rn()-0.5)*0.28));
+
+// ============================================================
+// STATO FILTRI (selezioni multi)
+// ============================================================
+const filters = {
+  gen: new Set(),
+  ori: new Set(),
+  sex: new Set(),
+  pn:  new Set(),
+  mm:  new Set(),
+  profA:  new Set(),
+  profJ1: new Set(),
+  profJ2: new Set(),
+  profM:  new Set(),
+  annoMin: 1925, annoMax: 1990
+};
+let hoverFamily   = null;
+let hoverPersonRid = null; // _idx della persona attualmente hover/pin
+let pinnedKey      = null; // `${rid}-${qi}` when a point is pinned
+
+// Registry per i conteggi dinamici sui filtri (popolato da buildButtons e buildDropdown)
+const countRefreshers = [];
+function refreshAllCounts(){ countRefreshers.forEach(fn => fn()); }
+
+function unique(field){
+  const s = new Set();
+  POOL_DATA.forEach(p => { if (p[field]) s.add(p[field]); });
+  return [...s].sort((a,b)=>a.localeCompare(b,'it'));
+}
+
+const OPTIONS = {
+  gen: [['G1','Prima generazione'], ['G2','Seconda generazione']],
+  ori: unique('origini').map(v=>[v,v]),
+  sex: [['F','Femminile'], ['M','Maschile']],
+  pn:  unique('paese_nascita').map(v=>[v,v]),
+  mm:  ['No','Sì','Non sposato/a','Non noto'].map(v=>[v,v]),
+  profA:  PROFILE_A_DEFS.map(d => [d.key, d.lab]),
+  profJ1: PROFILE_J1_DEFS.map(d => [d.key, d.lab]),
+  profJ2: PROFILE_J2_DEFS.map(d => [d.key, d.lab]),
+  profM:  PROFILE_M_DEFS.map(d => [d.key, d.lab])
+};
+
+const FILTER_FIELD = { gen:'gen', ori:'origini', sex:'genere', pn:'paese_nascita', mm:'matrimonio_misto' };
+function countOption(field, value){
+  return POOL_DATA.filter(p => p[field] === value).length;
+}
+function countProfileA(key){
+  return POOL_DATA.filter(p => getProfileA(p.scores[0],p.scores[1],p.scores[2]).key === key).length;
+}
+function countProfileJ1(key){ return POOL_DATA.filter(p => lvl(p.scores[3]) === key).length; }
+function countProfileJ2(key){ return POOL_DATA.filter(p => lvl(p.scores[4]) === key).length; }
+function countProfileM(key){  return POOL_DATA.filter(p => lvlM(p.scores[5]) === key).length; }
+function buildButtons(containerId, key, opts, countFn){
+  const box = document.getElementById(containerId);
+  opts.forEach(([v,label])=>{
+    const b = document.createElement('button');
+    b.className = 'tg';
+    b.type = 'button';
+    b.dataset.value = v;
+    b.innerHTML = `${label} <span class="tg-count">(0)</span>`;
+    const countSpan = b.querySelector('.tg-count');
+    countRefreshers.push(() => { countSpan.textContent = `(${countDynamic(key, v)})`; });
+    b.addEventListener('click', ()=>{
+      if (filters[key].has(v)) { filters[key].delete(v); b.classList.remove('on'); }
+      else { filters[key].add(v); b.classList.add('on'); }
+      update();
+    });
+    box.appendChild(b);
+  });
+}
+buildButtons('bg_gen','gen',OPTIONS.gen);
+buildButtons('bg_ori','ori',OPTIONS.ori);
+buildButtons('bg_sex','sex',OPTIONS.sex);
+buildButtons('bg_pn', 'pn', OPTIONS.pn);
+buildButtons('bg_mm', 'mm', OPTIONS.mm);
+// Dropdown multi-select per i filtri interpretativi
+function buildDropdown(containerId, key, opts, countFn){
+  const dd = document.getElementById(containerId);
+  const trigger = dd.querySelector('.dropdown-trigger');
+  const placeholder = trigger.querySelector('.dropdown-placeholder');
+  const panel = dd.querySelector('.dropdown-panel');
+  const field = FILTER_FIELD[key];
+
+  opts.forEach(([v,label])=>{
+    const item = document.createElement('label');
+    item.className = 'dropdown-item';
+    item.innerHTML = `<input type="checkbox" value="${v}"><span class="dropdown-item-label">${label}</span><span class="dropdown-item-count">(0)</span>`;
+    const cb = item.querySelector('input');
+    const countSpan = item.querySelector('.dropdown-item-count');
+    countRefreshers.push(() => { countSpan.textContent = `(${countDynamic(key, v)})`; });
+    cb.addEventListener('change', () => {
+      if (cb.checked) filters[key].add(v);
+      else filters[key].delete(v);
+      refreshPlaceholder();
+      update();
+    });
+    panel.appendChild(item);
+  });
+
+  function refreshPlaceholder(){
+    const n = filters[key].size;
+    if (n === 0){
+      placeholder.textContent = 'Tutti';
+      placeholder.classList.remove('has-selection');
+    } else {
+      placeholder.textContent = `${n} ${n===1?'selezionato':'selezionati'}`;
+      placeholder.classList.add('has-selection');
+    }
+  }
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.dropdown.open').forEach(o => { if (o !== dd) o.classList.remove('open'); });
+    dd.classList.toggle('open');
+  });
+  panel.addEventListener('click', e => e.stopPropagation());
+}
+
+buildDropdown('dd_profA',  'profA',  OPTIONS.profA,  countProfileA);
+buildDropdown('dd_profJ1', 'profJ1', OPTIONS.profJ1, countProfileJ1);
+buildDropdown('dd_profJ2', 'profJ2', OPTIONS.profJ2, countProfileJ2);
+buildDropdown('dd_profM',  'profM',  OPTIONS.profM,  countProfileM);
+
+// Chiusura dropdown al click esterno
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown.open').forEach(o => o.classList.remove('open'));
+});
+
+// ============================================================
+// DUAL RANGE SLIDER (anno)
+// ============================================================
+const annoMinEl = document.getElementById('anno_min');
+const annoMaxEl = document.getElementById('anno_max');
+const annoRangeLbl = document.getElementById('anno_range_label');
+const rangeFill = document.getElementById('range_fill');
+const A_MIN = 1925, A_MAX = 1990, A_GAP = 1;
+function updateRangeFill(){
+  const min = parseInt(annoMinEl.value), max = parseInt(annoMaxEl.value);
+  const pctMin = (min - A_MIN) / (A_MAX - A_MIN) * 100;
+  const pctMax = (max - A_MIN) / (A_MAX - A_MIN) * 100;
+  rangeFill.style.left = pctMin + '%';
+  rangeFill.style.width = (pctMax - pctMin) + '%';
+  annoRangeLbl.textContent = `${min} – ${max}`;
+  filters.annoMin = min; filters.annoMax = max;
+}
+annoMinEl.addEventListener('input', ()=>{
+  let mn = parseInt(annoMinEl.value), mx = parseInt(annoMaxEl.value);
+  if (mn > mx - A_GAP) { annoMinEl.value = mx - A_GAP; }
+  updateRangeFill(); update();
+});
+annoMaxEl.addEventListener('input', ()=>{
+  let mn = parseInt(annoMinEl.value), mx = parseInt(annoMaxEl.value);
+  if (mx < mn + A_GAP) { annoMaxEl.value = mn + A_GAP; }
+  updateRangeFill(); update();
+});
+updateRangeFill();
+
+// ============================================================
+// FILTRAGGIO (multi-select OR dentro ogni filtro, AND tra filtri)
+// ============================================================
+function passes(p){ return passesExcept(p, null); }
+
+// passa tutti i filtri TRANNE quello indicato — usato per i conteggi dinamici dei singoli filtri
+function passesExcept(p, exclude){
+  if (exclude!=='gen' && filters.gen.size && !filters.gen.has(p.gen)) return false;
+  if (exclude!=='ori' && filters.ori.size && !filters.ori.has(p.origini)) return false;
+  if (exclude!=='sex' && filters.sex.size && !filters.sex.has(p.genere)) return false;
+  if (exclude!=='pn'  && filters.pn.size  && !filters.pn.has(p.paese_nascita)) return false;
+  if (exclude!=='mm'  && filters.mm.size  && !filters.mm.has(p.matrimonio_misto)) return false;
+  if (exclude!=='anno' && (p.anno < filters.annoMin || p.anno > filters.annoMax)) return false;
+  if (exclude!=='profA' && filters.profA.size){
+    const k = getProfileA(p.scores[0], p.scores[1], p.scores[2]).key;
+    if (!filters.profA.has(k)) return false;
+  }
+  if (exclude!=='profJ1' && filters.profJ1.size){ const k = lvl(p.scores[3]);  if (!k || !filters.profJ1.has(k)) return false; }
+  if (exclude!=='profJ2' && filters.profJ2.size){ const k = lvl(p.scores[4]);  if (!k || !filters.profJ2.has(k)) return false; }
+  if (exclude!=='profM'  && filters.profM.size) { const k = lvlM(p.scores[5]); if (!k || !filters.profM.has(k))  return false; }
+  return true;
+}
+
+// estrae il valore di una persona per una determinata chiave-filtro
+function valueForKey(p, key){
+  if (key === 'gen') return p.gen;
+  if (key === 'ori') return p.origini;
+  if (key === 'sex') return p.genere;
+  if (key === 'pn')  return p.paese_nascita;
+  if (key === 'mm')  return p.matrimonio_misto;
+  if (key === 'profA')  return getProfileA(p.scores[0],p.scores[1],p.scores[2]).key;
+  if (key === 'profJ1') return lvl(p.scores[3]);
+  if (key === 'profJ2') return lvl(p.scores[4]);
+  if (key === 'profM')  return lvlM(p.scores[5]);
+}
+// conteggio "dinamico": persone che passano tutti gli ALTRI filtri e che hanno questo valore per "key"
+function countDynamic(key, value){
+  return POOL_DATA.filter(p => passesExcept(p, key) && valueForKey(p, key) === value).length;
+}
+function getFiltered(){ return POOL_DATA.filter(passes); }
+
+// ============================================================
+// TOOLTIP (anonimo, con pin al click)
+// ============================================================
+function ensureTooltipEl(){
+  let el = document.getElementById('ltip');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'ltip';
+    el.style.cssText = `position:absolute;pointer-events:none;background:#fffcf8;border:0.5px solid ${PALETTE.G1};border-radius:8px;padding:11px 14px;font-size:12px;width:340px;z-index:20;transition:opacity 0.12s;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,0.08);opacity:0;`;
+    document.getElementById('cwrap').appendChild(el);
+  }
+  return el;
+}
+function hideTooltip(){
+  const el = document.getElementById('ltip');
+  if (el) el.style.opacity = '0';
+}
+// Mappa qi (0-5) -> categoria della sezione del tooltip
+function qiCategory(qi){
+  if (qi <= 2) return 'A';
+  if (qi <= 4) return 'J';
+  return 'M';
+}
+
+function buildTooltipHTML(p, qi){
+  const fmt = v => v==null ? '—' : v.toFixed(1).replace('.0','');
+  const annoStr = p.anno + (p.anno_fake ? ' *' : '');
+  const genLabel = GEN_LABEL[p.gen] || p.gen;
+  const mmLabel  = MM_LABEL[p.matrimonio_misto] || p.matrimonio_misto;
+  const closeBtn = pinnedKey ? `<div class="close-x" onclick="event.stopPropagation(); unpinTooltip();" aria-label="Chiudi">×</div>` : '';
+
+  const sectionTitle = (t) => `<div style="font-size:9.5px;font-weight:600;color:#8b9591;letter-spacing:0.08em;margin:10px 0 4px;">${t}</div>`;
+  const indicLine = (code, val, txt) => `<div style="font-size:11px;color:#2d3a36;line-height:1.5;margin-top:3px;"><b>${code}</b> <span style="color:${PALETTE.G1};font-weight:600;">${fmt(val)}</span> — <span style="color:#5b6864;">${txt}</span></div>`;
+
+  // ACCULTURAZIONE
+  const profA = getProfileA(p.scores[0], p.scores[1], p.scores[2]);
+  const accHTML = `
+    ${sectionTitle('ACCULTURAZIONE')}
+    <div style="font-weight:600;font-size:12px;color:#2d3a36;line-height:1.3;">${profA.lab}</div>
+    ${profA.desc ? `<div style="color:#5b6864;font-size:11px;line-height:1.5;">${profA.desc}</div>` : ''}
+    <div style="font-size:10.5px;color:#8b9591;line-height:1.6;margin-top:3px;">A1 ${fmt(p.scores[0])} · A2 ${fmt(p.scores[1])} · A3 ${fmt(p.scores[2])}</div>
+  `;
+
+  // IDENTITÀ EBRAICA
+  const lJ1 = lvl(p.scores[3]);
+  const lJ2 = lvl(p.scores[4]);
+  const txtJ1 = lJ1 ? INTERP_J1[lJ1] : '—';
+  const txtJ2 = lJ2 ? INTERP_J2[lJ2] : '—';
+  const idHTML = `
+    ${sectionTitle('IDENTITÀ EBRAICA')}
+    ${indicLine('J1',   p.scores[3], txtJ1)}
+    ${indicLine('J2-3', p.scores[4], txtJ2)}
+  `;
+
+  // MEMORIA MEDITERRANEA
+  const lM = lvlM(p.scores[5]);
+  const txtM = lM ? INTERP_M[lM] : '—';
+  const det = lM ? M_DETAIL[lM] : null;
+  const detHTML = det ? `
+    <div style="font-size:10.5px;color:#5b6864;line-height:1.55;margin-top:6px;font-style:italic;">${det.sub}</div>
+    <ul style="margin:4px 0 0;padding-left:14px;font-size:10.5px;color:#8b9591;line-height:1.5;">
+      ${det.keys.map(c => `<li>${c}</li>`).join('')}
+    </ul>` : '';
+  const memHTML = `
+    ${sectionTitle('MEMORIA MEDITERRANEA')}
+    ${indicLine('M', p.scores[5], txtM)}
+    ${detHTML}
+  `;
+
+  return `
+    ${closeBtn}
+    <div style="font-weight:600;font-size:12px;color:${PALETTE.G1};margin-bottom:6px;letter-spacing:0.02em;padding-right:22px;">${genLabel} · Origini: ${p.origini}</div>
+    <div style="font-size:11px;color:#5b6864;line-height:1.55;margin-bottom:4px;">
+      Anno nascita: <b>${annoStr}</b><br>
+      Genere: <b>${p.genere}</b> · Paese nascita: <b>${p.paese_nascita}</b><br>
+      <b>${mmLabel}</b>
+    </div>
+
+    ${accHTML}
+    ${idHTML}
+    ${memHTML}
+
+    ${p.anno_fake ? '<div style="margin-top:10px;font-size:10px;color:#8b9591;font-style:italic;">* anno fittizio (in attesa del dato reale)</div>' : ''}
+  `;
+}
+function showTooltip(p, qi, x, y){
+  const el = ensureTooltipEl();
+  el.innerHTML = buildTooltipHTML(p, qi);
+  // pointer-events: auto solo quando pinnato (così la X è cliccabile e il body non fa click-through)
+  el.style.pointerEvents = pinnedKey ? 'auto' : 'none';
+  const wrap = document.getElementById('cwrap');
+  let lx = x + 16, ly = y - 24;
+  if (lx + 360 > wrap.offsetWidth) lx = x - 370;
+  if (ly < 0) ly = 4;
+  el.style.left = lx + 'px';
+  el.style.top  = ly + 'px';
+  el.style.opacity = '1';
+}
+// global handler per la X (chiamato da onclick inline)
+function unpinTooltip(){
+  if (pinnedKey === null) return;
+  pinnedKey = null;
+  hoverFamily = null;
+  hoverPersonRid = null;
+  hideTooltip();
+  if (chart) applyPerPointStyles(chart);
+}
+window.unpinTooltip = unpinTooltip;
+function tooltip({chart, tooltip}){
+  if (pinnedKey !== null) return; // pinned: ignora hover
+  if (tooltip.opacity === 0){ hideTooltip(); return; }
+  const dp = tooltip.dataPoints[0];
+  const p = POOL_DATA[dp.raw._rid];
+  showTooltip(p, dp.raw._qi, tooltip.caretX, tooltip.caretY);
+}
+
+// ============================================================
+// COSTRUZIONE PUNTI — singolo dataset con per-point styling
+// Colore = generazione; bordo = highlight famiglia
+// ============================================================
+function mkDS(filtered){
+  const data = [], bgs = [], borders = [], borderWs = [], radii = [];
+  filtered.forEach(p => {
+    for (let qi = 0; qi < 6; qi++){
+      const s = p.scores[qi];
+      if (s == null) continue;
+      data.push({
+        x: s + JX[p._idx][qi],
+        y: QI_TO_Y[qi] + JY[p._idx][qi],
+        _rid: p._idx, _qi: qi, _score: s
+      });
+      const isPerson = hoverPersonRid !== null && p._idx === hoverPersonRid;
+      const dim = hoverFamily && p.famiglia !== hoverFamily;
+      bgs.push(isPerson ? PALETTE.accent : (dim ? PALETTE.dim : (p.gen === 'G1' ? PALETTE.G1 : PALETTE.G2)));
+      borders.push('transparent');
+      borderWs.push(0);
+      radii.push(7.5);
+    }
+  });
+  return [{
+    label: 'risposte',
+    data, backgroundColor: bgs,
+    borderColor: borders, borderWidth: borderWs,
+    radius: radii, hoverRadius: 10, pointStyle: 'circle'
+  }];
+}
+
+// ============================================================
+// HOVER → highlight famiglia (disabilitato quando un punto è pinnato)
+// ============================================================
+function applyPerPointStyles(chart){
+  const ds = mkDS(getFiltered())[0];
+  chart.data.datasets[0].backgroundColor = ds.backgroundColor;
+  chart.data.datasets[0].borderColor = ds.borderColor;
+  chart.data.datasets[0].borderWidth = ds.borderWidth;
+  chart.data.datasets[0].radius = ds.radius;
+  chart.update('none');
+}
+function onChartHover(event, elements, chart){
+  if (pinnedKey !== null) return; // pinned: non modificare il family highlight
+  let newFam = null, newRid = null;
+  if (elements && elements.length > 0){
+    const el = elements[0];
+    const dp = chart.data.datasets[el.datasetIndex].data[el.index];
+    if (dp && dp._rid !== undefined){
+      newRid = dp._rid;
+      newFam = POOL_DATA[dp._rid].famiglia;
+    }
+  }
+  if (newFam !== hoverFamily || newRid !== hoverPersonRid){
+    hoverFamily = newFam;
+    hoverPersonRid = newRid;
+    applyPerPointStyles(chart);
+  }
+}
+
+// ============================================================
+// CLICK → pin / unpin tooltip
+// ============================================================
+function onChartClick(event, elements, chart){
+  if (elements && elements.length > 0){
+    const el = elements[0];
+    const dp = chart.data.datasets[el.datasetIndex].data[el.index];
+    const key = `${dp._rid}-${dp._qi}`;
+    if (pinnedKey === key){
+      // stesso punto: sblocca
+      pinnedKey = null;
+      hoverFamily = null;
+      hoverPersonRid = null;
+      hideTooltip();
+      applyPerPointStyles(chart);
+    } else {
+      // nuovo punto: blocca (sostituisce eventuale pin precedente)
+      pinnedKey = key;
+      hoverFamily = POOL_DATA[dp._rid].famiglia;
+      hoverPersonRid = dp._rid;
+      applyPerPointStyles(chart);
+      // riposiziona tooltip sulla coordinata canvas del punto
+      const meta = chart.getDatasetMeta(el.datasetIndex);
+      const pt = meta.data[el.index];
+      showTooltip(POOL_DATA[dp._rid], dp._qi, pt.x, pt.y);
+    }
+  } else {
+    // click sullo sfondo: sblocca
+    if (pinnedKey !== null){
+      pinnedKey = null;
+      hoverFamily = null;
+      hoverPersonRid = null;
+      hideTooltip();
+      applyPerPointStyles(chart);
+    }
+  }
+}
+
+// ============================================================
+// PLUGIN — etichette di categoria nei gap dell'asse Y
+// ============================================================
+const categoryLabelsPlugin = {
+  id: 'categoryLabels',
+  afterDatasetsDraw(chart){
+    const yScale = chart.scales.y;
+    if (!yScale) return;
+    const ctx = chart.ctx;
+    const chartArea = chart.chartArea;
+    ctx.save();
+    ctx.font = "400 10px 'DM Sans', system-ui, sans-serif";
+    ctx.fillStyle = '#8b9591';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'right';
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0.08em';
+    const x = chartArea.left - 6;
+    CATEGORIES.forEach(c => {
+      const py = yScale.getPixelForValue(c.y);
+      ctx.fillText(c.label, x, py);
+    });
+    ctx.restore();
+  }
+};
+
+// Plugin per scrivere la domanda sotto al nome dell'indicatore (asse Y)
+const questionsPlugin = {
+  id: 'indicatorQuestions',
+  afterDatasetsDraw(chart){
+    const yScale = chart.scales.y;
+    if (!yScale) return;
+    const ctx = chart.ctx;
+    const chartArea = chart.chartArea;
+    ctx.save();
+    ctx.font = "italic 400 11.5px 'DM Sans', system-ui, sans-serif";
+    ctx.fillStyle = '#8b9591';
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'right';
+    const x = chartArea.left - 6;
+    QUESTIONS.forEach((q, qi) => {
+      const py = yScale.getPixelForValue(QI_TO_Y[qi]);
+      // il nome dell'indicatore (2 righe, 12.5px ≈ 30px totali) è centrato a py
+      // la domanda va appena sotto: py + ~16-18px
+      ctx.fillText(q, x, py + 16);
+    });
+    ctx.restore();
+  }
+};
+
+// Plugin per la linea coral che connette i punti della stessa persona (hover/pin)
+const personLinePlugin = {
+  id: 'personLine',
+  beforeDatasetsDraw(chart){
+    if (hoverPersonRid === null) return;
+    const p = POOL_DATA[hoverPersonRid];
+    const xScale = chart.scales.x, yScale = chart.scales.y;
+    if (!xScale || !yScale) return;
+    const pts = [];
+    for (let qi = 0; qi < 6; qi++){
+      const s = p.scores[qi];
+      if (s == null) continue;
+      const xData = s + JX[p._idx][qi];
+      const yData = QI_TO_Y[qi] + JY[p._idx][qi];
+      pts.push({ x: xScale.getPixelForValue(xData), y: yScale.getPixelForValue(yData) });
+    }
+    if (pts.length < 2) return;
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.strokeStyle = PALETTE.accent;
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap  = 'round';
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+
+// Plugin per le 3 fasce di sfondo A / J / M
+const categoryBandsPlugin = {
+  id: 'categoryBands',
+  beforeDatasetsDraw(chart){
+    const yScale = chart.scales.y;
+    if (!yScale) return;
+    const ctx = chart.ctx;
+    const area = chart.chartArea;
+    const BANDS = [
+      { y0: 0.1, y1: 3.05,  fill: 'rgba(210, 195, 158, 0.12)' },  // ACCULTURAZIONE — cream alpha 12%
+      { y0: 3.05, y1: 5.05, fill: 'rgba(210, 195, 158, 0.24)' },  // IDENTITÀ EBRAICA — cream alpha 24%
+      { y0: 5.05, y1: 6.1,  fill: 'rgba(210, 195, 158, 0.40)' }   // MEMORIA MEDITERRANEA — cream alpha 40%
+    ];
+    ctx.save();
+    BANDS.forEach(b => {
+      const yTop = yScale.getPixelForValue(b.y0);
+      const yBot = yScale.getPixelForValue(b.y1);
+      ctx.fillStyle = b.fill;
+      ctx.fillRect(area.left, Math.min(yTop, yBot), area.right - area.left, Math.abs(yBot - yTop));
+    });
+    ctx.restore();
+  }
+};
+
+// ============================================================
+// CHART
+// ============================================================
+let chart;
+function update(){
+  // un cambio di filtri scioglie un eventuale pin (la persona potrebbe non esserci più)
+  if (pinnedKey !== null){
+    pinnedKey = null;
+    hoverFamily = null;
+    hoverPersonRid = null;
+    hideTooltip();
+  }
+  const f = getFiltered();
+  refreshAllCounts();
+  const ds = mkDS(f);
+  if (!chart){
+    chart = new Chart(document.getElementById('dc'), {
+      type: 'scatter',
+      data: { datasets: ds },
+      plugins: [categoryLabelsPlugin, questionsPlugin, personLinePlugin],
+      options: {
+        animation: { duration: 200 },
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { right: 8, top: 4, bottom: 4 } },
+        onHover: (event, elements, chart) => onChartHover(event, elements, chart),
+        onClick: (event, elements, chart) => onChartClick(event, elements, chart),
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false, external: tooltip }
+        },
+        scales: {
+          x: {
+            min: -0.55, max: 4.55,
+            ticks: {
+              stepSize: 1, autoSkip: false,
+              font: { size: 11, family: "'DM Sans', system-ui, sans-serif" },
+              color: '#5b6864',
+              callback: v => { const i = Math.round(v); return (i>=0 && i<=4) ? [String(i), SCALE[i]] : ''; }
+            },
+            grid: { color: 'rgba(74, 123, 113, 0.08)' }
+          },
+          xTop: {
+            type: 'linear', position: 'top',
+            min: -0.55, max: 4.55,
+            ticks: {
+              stepSize: 1, autoSkip: false,
+              font: { size: 11, family: "'DM Sans', system-ui, sans-serif" },
+              color: '#5b6864',
+              callback: v => { const i = Math.round(v); return (i>=0 && i<=4) ? [SCALE[i], String(i)] : ''; }
+            },
+            grid: { display: false },
+            border: { display: false }
+          },
+          y: {
+            min: 0.1, max: 6.1,
+            reverse: true,
+            afterBuildTicks: (axis) => {
+              axis.ticks = QI_TO_Y.map((value, qi) => ({ value, label: QY[qi] }));
+            },
+            afterFit: ax => { ax.width = 280; },
+            ticks: {
+              autoSkip: false, maxRotation: 0,
+              font: { size: 12.5, family: "'DM Sans', system-ui, sans-serif" },
+              color: '#5b6864',
+              callback: function(value){
+                const idx = QI_TO_Y.indexOf(value);
+                return idx >= 0 ? QY[idx] : '';
+              }
+            },
+            grid: { color: 'rgba(74, 123, 113, 0.06)' }
+          }
+        }
+      }
+    });
+  } else {
+    chart.data.datasets = ds;
+    chart.update('none');
+  }
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetF(){
+  ['gen','ori','sex','pn','mm','profA','profJ1','profJ2','profM'].forEach(k => filters[k].clear());
+  document.querySelectorAll('.tg.on').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.dropdown input[type=checkbox]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('.dropdown.open').forEach(o => o.classList.remove('open'));
+  document.querySelectorAll('.dropdown-placeholder').forEach(p => { p.textContent = 'Tutti'; p.classList.remove('has-selection'); });
+  filters.annoMin = A_MIN; filters.annoMax = A_MAX;
+  annoMinEl.value = A_MIN; annoMaxEl.value = A_MAX;
+  updateRangeFill();
+  hoverFamily = null;
+  update();
+}
+
+update();
+</script>
